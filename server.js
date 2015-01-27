@@ -1,16 +1,46 @@
 var http = require('http');
-
-var url = 'http://google.com';
-
-var body = '<p>Redirecting to <a href="' + url + '">' + url + '</a></p>';
+var url = require('url');
+var items = [];
 
 var server = http.createServer(function(req, res) {
-  // res.write('Hello world');
-  res.setHeader('Location', url);
-  res.setHeader('Content-Length', body.length);
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 302;
-  res.end(body);
+  switch (req.method) {
+    case 'POST':
+      var item = '';
+      req.setEncoding('utf8');
+      req.on('data', function(chunk) {
+        item += chunk;
+      });
+
+      req.on('end', function() {
+        items.push(item);
+        res.end('OK\n');
+      });
+      break;
+    case 'GET':
+      items.forEach(function(item, i) {
+        res.write(i + ') ' + item + '\n');
+      });
+      res.end();
+      break;
+    case 'DELETE':
+      var path = url.parse(req.url).pathname;
+      var i = parseInt(path.slice(1), 10);
+
+      // Check number is valid
+      if (isNaN(i)) {
+        res.statusCode = 400;
+        res.end('Invalid item id');
+      // Ensure reference ID exists
+      } else if (!items[i]) {
+        res.statusCode = 404;
+        res.end('Item not found');
+      // Delete it!
+      } else {
+        items.splice(i, 1);
+        res.end('OK\n');
+      }
+      break;
+    }
 });
 
 server.listen(3000);
