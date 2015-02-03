@@ -1,0 +1,14 @@
+Node convention: callbacks take two arguments. First is for an error, the second is for the results. Eg function(err, data){...}
+
+Use callbacks for one-off async logic
+Use event emitters to dispatch async logic repeatedly: 
+`watcher.on('click', function () {
+  
+})`
+
+Concept of 'flow control' to take some semblance of control over order of execution.
+Serial - tasks occur one after the other. Eg, creating file and saving it
+Parallel - files to be compressed after download: need to download all before creating archive.
+Can use a tool such as Nimble to help keep on top of what tasks are running. Helps avoid callback nesting.
+
+
